@@ -108,16 +108,39 @@
 
   // ── doLogin ───────────────────────────────────────────────────────────────────
   async function doLogin() {
-    var login = document.getElementById('login-user').value.trim().toLowerCase();
-    var senha = document.getElementById('login-pass').value;
-    var errEl = document.getElementById('login-error');
-    errEl.textContent = '';
+    var loginComp = document.getElementById('login');
+    var credentials = {
+      login: '',
+      password: ''
+    };
+    if (loginComp && typeof loginComp.getCredentials === 'function') {
+      credentials = loginComp.getCredentials();
+    } else {
+      credentials.login = document.getElementById('login-user')?.value.trim().toLowerCase() || '';
+      credentials.password = document.getElementById('login-pass')?.value || '';
+    }
 
-    if (!login || !senha) { errEl.textContent = 'Preencha login e senha.'; return; }
+    var login = credentials.login.trim().toLowerCase();
+    var senha = credentials.password;
+    var setError = function (message) {
+      if (loginComp && typeof loginComp.setError === 'function') {
+        loginComp.setError(message);
+      } else {
+        var legacyLoginError = document.getElementById('login-error');
+        if (legacyLoginError) legacyLoginError.textContent = message || '';
+      }
+    };
+
+    setError('');
+
+    if (!login || !senha) {
+      setError('Preencha login e senha.');
+      return;
+    }
 
     var user = await global.dbGet('usuarios', login);
     if (!user || user.senha !== senha) {
-      errEl.textContent = 'Login ou senha incorretos.';
+      setError('Login ou senha incorretos.');
       return;
     }
 
@@ -148,7 +171,9 @@
 
     applyNavPermissions();
 
-    document.getElementById('login-screen').style.display = 'none';
+    if (loginComp) {
+      loginComp.style.display = 'none';
+    }
     document.getElementById('main').style.display = '';
     if (sidebarEl) sidebarEl.style.display = '';
 
@@ -164,11 +189,20 @@
     currentUser = null;
     global.currentUser = null;
 
-    document.getElementById('login-user').value = '';
-    document.getElementById('login-pass').value = '';
-    document.getElementById('login-error').textContent = '';
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('main').style.display    = 'none';
+    var loginComp = document.getElementById('login');
+    if (loginComp && typeof loginComp.reset === 'function') {
+      loginComp.reset();
+      loginComp.style.display = 'flex';
+    } else {
+      document.getElementById('login-user')?.value = '';
+      document.getElementById('login-pass')?.value = '';
+      var legacyLoginError = document.getElementById('login-error');
+      if (legacyLoginError) legacyLoginError.textContent = '';
+      var legacyLoginScreen = document.getElementById('login-screen');
+      if (legacyLoginScreen) legacyLoginScreen.style.display = 'flex';
+    }
+
+    document.getElementById('main').style.display = 'none';
 
     var sidebarEl = document.getElementById('sidebar');
     if (sidebarEl) {
