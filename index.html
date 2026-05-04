@@ -5078,7 +5078,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (confirm('Deseja encerrar a sessão?')) doLogout();
   });
 
-  initDB().then(async function () {
+  var dbInitPromise = initDB();
+  window.dbReady = dbInitPromise;
+
+  dbInitPromise.then(async function () {
     var initAdmin = window.initDefaultAdmin;
     if (typeof initAdmin === 'function') {
       await initAdmin();
