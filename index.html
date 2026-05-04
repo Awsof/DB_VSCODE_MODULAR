@@ -5050,8 +5050,22 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('main').style.display    = 'none';
   document.getElementById('sidebar').style.display = 'none';
 
-  document.addEventListener('db-login-submit', function () {
-    doLogin();
+  document.addEventListener('db-login-submit', async () => {
+    const loginComp = document.getElementById('login');
+    const { login, password } = loginComp.getCredentials();
+    
+    try {
+      const success = await doLogin(login, password);
+      
+      if (success) {
+        loginComp.reset();
+      } else {
+        // Erro já foi setado dentro de doLogin
+      }
+    } catch (err) {
+      console.error("Erro no processo de login:", err);
+      loginComp.setError('Erro ao conectar ao banco de dados.');
+    }
   });
 
   document.addEventListener('db-navigate', function (e) {
