@@ -116,8 +116,10 @@
     if (!providedLogin && loginComp && typeof loginComp.getCredentials === 'function') {
       credentials = loginComp.getCredentials();
     } else {
-      credentials.login = document.getElementById('login-user')?.value.trim().toLowerCase() || '';
-      credentials.password = document.getElementById('login-pass')?.value || '';
+      var loginUserInput = document.getElementById('login-user');
+      var loginPassInput = document.getElementById('login-pass');
+      credentials.login = loginUserInput ? loginUserInput.value.trim().toLowerCase() : '';
+      credentials.password = loginPassInput ? loginPassInput.value : '';
     }
 
     var login = credentials.login.trim().toLowerCase();
