@@ -5050,22 +5050,35 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('main').style.display    = 'none';
   document.getElementById('sidebar').style.display = 'none';
 
-  document.addEventListener('db-login-submit', async () => {
-    const loginComp = document.getElementById('login');
-    const { login, password } = loginComp.getCredentials();
-    
-    try {
-      const success = await doLogin(login, password);
-      
-      if (success) {
-        loginComp.reset();
-      } else {
-        // Erro já foi setado dentro de doLogin
-      }
-    } catch (err) {
-      console.error("Erro no processo de login:", err);
-      loginComp.setError('Erro ao conectar ao banco de dados.');
+  document.addEventListener('db-login-submit', function () {
+    var loginComp = document.getElementById('login');
+    var credentials = { login: '', password: '' };
+    if (loginComp && typeof loginComp.getCredentials === 'function') {
+      credentials = loginComp.getCredentials();
     }
+
+    var login = credentials.login || '';
+    var password = credentials.password || '';
+    var loginFn = window.doLogin || (window.parent && window.parent.doLogin);
+
+    if (typeof loginFn !== 'function') {
+      console.error('doLogin não encontrado em window. Verifique core/auth.js.');
+      if (loginComp && typeof loginComp.setError === 'function') {
+        loginComp.setError('Erro interno. Recarregue a página.');
+      }
+      return;
+    }
+
+    Promise.resolve(loginFn(login, password)).then(function (success) {
+      if (success && loginComp && typeof loginComp.reset === 'function') {
+        loginComp.reset();
+      }
+    }).catch(function (err) {
+      console.error('Erro no processo de login:', err);
+      if (loginComp && typeof loginComp.setError === 'function') {
+        loginComp.setError('Erro ao conectar ao banco de dados.');
+      }
+    });
   });
 
   document.addEventListener('db-navigate', function (e) {
