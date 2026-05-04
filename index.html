@@ -5065,12 +5065,11 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   initDB().then(async function () {
-    if (typeof initDefaultAdmin === 'function') {
-      await initDefaultAdmin();
-    } else if (typeof window.initDefaultAdmin === 'function') {
-      await window.initDefaultAdmin();
+    var initAdmin = window.initDefaultAdmin;
+    if (typeof initAdmin === 'function') {
+      await initAdmin();
     } else {
-      console.warn('initDefaultAdmin não está definido. Verifique core/auth.js.');
+      console.warn('window.initDefaultAdmin não está definido. Verifique core/auth.js.');
     }
     const perfis = await dbAll('perfis_acesso');
     if (perfis.length === 0) {
