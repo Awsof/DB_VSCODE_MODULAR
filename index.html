@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="./components/db-sidebar.js" defer></script>
+<script src="./components/db-topbar.js" defer></script>
 <script src="./core/db.js" defer></script>
 <script src="./core/auth.js" defer></script>
 <script src="./core/router.js" defer></script>
@@ -64,15 +65,6 @@
 
   /* MAIN */
   #main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-  .topbar {
-    background: var(--bg2); border-bottom: 1px solid var(--border);
-    padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
-    box-shadow: 0 1px 4px rgba(0,55,97,.06);
-  }
-  .topbar-left { display: flex; flex-direction: column; }
-  .page-title { font-size: 18px; font-weight: 700; color: var(--navy); }
-  .page-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
-  .topbar-right { display: flex; align-items: center; gap: 10px; }
   #content { flex: 1; overflow-y: auto; padding: 28px; background: var(--bg); }
 
   /* CARDS METRICS */
@@ -574,13 +566,7 @@
 
 <!-- MAIN -->
 <main id="main">
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="page-title" id="page-title">Dashboard</div>
-      <div class="page-sub" id="page-sub">Visão geral da plataforma</div>
-    </div>
-    <div class="topbar-right" id="topbar-actions"></div>
-  </div>
+  <db-topbar id="topbar" title="Dashboard" subtitle="Visão geral da plataforma"></db-topbar>
   <div id="rls-global-banner" style="padding:0 0 2px 0"></div>
   <div id="content"></div>
 </main>
@@ -601,8 +587,7 @@ var currentPage = '';
 
 // ===================== PAGE: DASHBOARD =====================
 pages.dashboard = async function() {
-  document.getElementById('page-title').textContent = 'Dashboard Integração';
-  document.getElementById('page-sub').textContent = 'Visão gerencial de clientes e integrações';
+  updateTopbar('Dashboard Integração', 'Visão gerencial de clientes e integrações');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn-report" id="dash-int-report">📄 Gerar Relatório</button>`;
 
   const [_clientesRaw, reps, sistemas, chamados, envios] = await Promise.all([
@@ -834,8 +819,7 @@ let labPage = 1, labSearch = '', labSearchCodigo = '', labSearchCNPJ = '', labUF
 const LAB_PER_PAGE = 24;
 
 pages.laboratorios = async function() {
-  document.getElementById('page-title').textContent = 'Laboratórios';
-  document.getElementById('page-sub').textContent = 'Clientes / Laboratórios cadastrados';
+  updateTopbar('Laboratórios', 'Clientes / Laboratórios cadastrados');
   document.getElementById('topbar-actions').innerHTML = '';
 
   const [_clientesLab, reps, sistemas, allChamados, allEnvios] = await Promise.all([
@@ -1546,8 +1530,7 @@ async function openLabModal(codigo, clientes, reps, sistemas, sysById) {
 
 // ===================== PAGE: REPRESENTANTES =====================
 pages.representantes = async function() {
-  document.getElementById('page-title').textContent = 'Representantes';
-  document.getElementById('page-sub').textContent = 'Gestão de representantes comerciais';
+  updateTopbar('Representantes', 'Gestão de representantes comerciais');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn" id="new-rep-btn">+ Novo Representante</button>`;
 
   const renderPage = async (search = '', filterSup = '') => {
@@ -1686,8 +1669,7 @@ function openRepModal(id, refresh, search = '', filterSup = '') {
 
 // ===================== PAGE: ASSESSORES =====================
 pages.assessores = async function() {
-  document.getElementById('page-title').textContent = 'Assessores';
-  document.getElementById('page-sub').textContent = 'Gestão de assessores do Programa Esmeralda e Chivor';
+  updateTopbar('Assessores', 'Gestão de assessores do Programa Esmeralda e Chivor');
   document.getElementById('topbar-actions').innerHTML = '';
 
   const [assessoresDB, clientes] = await Promise.all([dbAll('assessores'), dbAll('clientes')]);
@@ -1911,8 +1893,7 @@ pages.assessores = async function() {
 
 // ===================== PAGE: SUPERVISORES =====================
 pages.supervisores = async function() {
-  document.getElementById('page-title').textContent = 'Supervisores';
-  document.getElementById('page-sub').textContent = 'Gestão de supervisores comerciais';
+  updateTopbar('Supervisores', 'Gestão de supervisores comerciais');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn" id="new-sup-btn">+ Novo Supervisor</button>`;
 
   const renderSupervisores = async (search = '') => {
@@ -2035,8 +2016,7 @@ function openSupModal(id, refresh, search = '') {
 
 // ===================== PAGE: ANALISTAS =====================
 pages.analistas = async function() {
-  document.getElementById('page-title').textContent = 'Analistas';
-  document.getElementById('page-sub').textContent = 'Gestão de analistas de implantação';
+  updateTopbar('Analistas', 'Gestão de analistas de implantação');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn" id="new-ana-btn">+ Novo Analista</button>`;
 
   const renderAnalistas = async (search = '') => {
@@ -2251,8 +2231,7 @@ function openAnalistaModal(id, refresh, search = '') {
 
 // ===================== PAGE: SISTEMAS =====================
 pages.sistemas = async function() {
-  document.getElementById('page-title').textContent = 'Sistemas Laboratoriais';
-  document.getElementById('page-sub').textContent = 'Gestão de sistemas integrados';
+  updateTopbar('Sistemas Laboratoriais', 'Gestão de sistemas integrados');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn" id="new-sys-btn">+ Novo Sistema</button>`;
 
   const renderSistemas = async (search = '', filterTipo = '') => {
@@ -2784,8 +2763,7 @@ function openSysModal(id, refresh, search = '', filterTipo = '') {
 
 // ===================== PAGE: IMPORTAÇÃO =====================
 pages.importacao = async function() {
-  document.getElementById('page-title').textContent = 'Importação & Relatórios';
-  document.getElementById('page-sub').textContent = 'Sincronização semanal da planilha';
+  updateTopbar('Importação & Relatórios', 'Sincronização semanal da planilha');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn danger" id="clear-data-btn">🗑 Limpar Todos os Dados</button>`;
 
   document.getElementById('clear-data-btn').addEventListener('click', async () => {
@@ -3191,8 +3169,7 @@ pages.importacao = async function() {
 
 // ===================== PAGE: DIVERGÊNCIAS =====================
 pages.divergencias = async function() {
-  document.getElementById('page-title').textContent = 'Divergências';
-  document.getElementById('page-sub').textContent = 'Cruzamento entre integração e base de envio';
+  updateTopbar('Divergências', 'Cruzamento entre integração e base de envio');
   document.getElementById('topbar-actions').innerHTML = '';
 
   const [_clientesDiv, reps, sistemas, chamados, envios] = await Promise.all([
@@ -3470,8 +3447,7 @@ pages.divergencias = async function() {
 
 // ===================== PAGE: PROPOSTAS =====================
 pages.propostas = async function() {
-  document.getElementById('page-title').textContent = 'Propostas';
-  document.getElementById('page-sub').textContent = 'Gestão de propostas comerciais';
+  updateTopbar('Propostas', 'Gestão de propostas comerciais');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn" id="new-prop-btn">+ Nova Proposta</button>`;
 
   const [propostas, clientes, sistemas, chamados] = await Promise.all([
@@ -3668,8 +3644,7 @@ function openPropostaModal(id, sistemas, analistaSet, clienteByCode, refresh) {
 
 // ===================== PAGE: PACOTES =====================
 pages.pacotes = async function() {
-  document.getElementById('page-title').textContent = 'Pacotes';
-  document.getElementById('page-sub').textContent = 'Gestão de pacotes de implantação';
+  updateTopbar('Pacotes', 'Gestão de pacotes de implantação');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn" id="new-pac-btn">+ Novo Pacote</button>`;
 
   const [pacotes, registros, clientes, sistemas, chamados] = await Promise.all([
@@ -3838,8 +3813,7 @@ function openPacoteRegModal(fk_pacote, clientes, chamados, analistaSet, refresh)
 
 // ===================== PAGE: DASHBOARD FINANCEIRO =====================
 pages.dashboard_financeiro = async function() {
-  document.getElementById('page-title').textContent = 'Dashboard Financeiro';
-  document.getElementById('page-sub').textContent = 'Visão gerencial de propostas, pacotes e budget';
+  updateTopbar('Dashboard Financeiro', 'Visão gerencial de propostas, pacotes e budget');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn-report" id="dash-fin-report">📄 Gerar Relatório</button>`;
 
   const [propostas, pacotes, _allRegistros, sistemas, budgetRecs] = await Promise.all([
@@ -4034,8 +4008,7 @@ pages.dashboard_financeiro = async function() {
 
 
 pages.dashboard_comercial = async function() {
-  document.getElementById('page-title').textContent = 'Dashboard Comercial';
-  document.getElementById('page-sub').textContent = 'Visão gerencial de clientes, UFs, representantes e grupos';
+  updateTopbar('Dashboard Comercial', 'Visão gerencial de clientes, UFs, representantes e grupos');
   document.getElementById('topbar-actions').innerHTML = `<button class="btn-report" id="dash-com-report">📄 Gerar Relatório</button>`;
   document.getElementById('content').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:200px;gap:12px;color:var(--text3)"><div class="spinner"></div> Carregando dados...</div>`;
 
@@ -4527,8 +4500,7 @@ pages.dashboard_comercial = async function() {
 
 // ===================== PAGE: GRUPOS E MATRIZES =====================
 pages.grupos_matrizes = async function() {
-  document.getElementById('page-title').textContent = 'Grupos e Matrizes';
-  document.getElementById('page-sub').textContent = 'Consulta por grupo, matriz e filiais vinculadas';
+  updateTopbar('Grupos e Matrizes', 'Consulta por grupo, matriz e filiais vinculadas');
   document.getElementById('topbar-actions').innerHTML = '';
 
   const [clientes, reps, sistemas] = await Promise.all([dbAll('clientes'), dbAll('representantes'), dbAll('sistemas')]);
@@ -4725,8 +4697,7 @@ function buildDefaultPerms() {
 }
 
 pages.perfis_acesso = async function() {
-  document.getElementById('page-title').textContent = 'Perfis de acesso e usuários';
-  document.getElementById('page-sub').textContent = 'Gerencie permissões por perfil';
+  updateTopbar('Perfis de acesso e usuários', 'Gerencie permissões por perfil');
   document.getElementById('topbar-actions').innerHTML = '';
 
   // Load or seed default perfis

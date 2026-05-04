@@ -188,6 +188,28 @@
     URL.revokeObjectURL(url);
   }
 
+  // ── updateTopbar ─────────────────────────────────────────────────────────
+  function updateTopbar(title, subtitle, actions) {
+    const topbar = document.getElementById('topbar');
+    if (topbar) {
+      if (title !== undefined) topbar.title = title;
+      if (subtitle !== undefined) topbar.subtitle = subtitle;
+      if (actions !== undefined) {
+        // Limpar slot actions atual
+        const existingActions = topbar.querySelector('[slot="actions"]');
+        if (existingActions) existingActions.remove();
+
+        if (actions) {
+          // Criar container para actions
+          const actionsContainer = document.createElement('div');
+          actionsContainer.setAttribute('slot', 'actions');
+          actionsContainer.innerHTML = actions;
+          topbar.appendChild(actionsContainer);
+        }
+      }
+    }
+  }
+
   // ── Registro em window ─────────────────────────────────────────────────────
   global.toast                  = toast;
   global.openModal              = openModal;
@@ -201,5 +223,6 @@
   global.renderIntStatusBadge   = renderIntStatusBadge;
   global.downloadModeloCSV      = downloadModeloCSV;
   global.downloadModeloEnvioCSV = downloadModeloEnvioCSV;
+  global.updateTopbar           = updateTopbar;
 
 }(window));

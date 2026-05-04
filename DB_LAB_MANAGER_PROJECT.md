@@ -1,8 +1,6 @@
 # DB Lab Manager — Documentação do Projeto
 
-> **Versão atual:** index_V26.html + core/ (4 módulos IIFE clássicos) + components/db-sidebar.js  
-> **Banco de dados:** IndexedDB local (browser), versão de esquema 9  
-> **Stack:** HTML + CSS + JavaScript puro · IIFE modules (window.*) · XLSX.js · Chart.js · Web Components (Custom Elements v1)
+> **Versão atual:** index_V28.html + core/ (4 módulos IIFE clássicos) + components/db-sidebar.js + components/db-topbar.js + import/ (3 módulos de engines)
 
 ---
 
@@ -390,22 +388,54 @@ Os 4 módulos foram reescritos como **scripts clássicos IIFE** (`Immediately In
 
 ---
 
-### FASE 2 — Extração de motores de importação
+### FASE 2 — Extração de motores de importação ✅ CONCLUÍDO (V27)
 
-- [ ] **`import-g5.js`** — `processImport()`, `IGNORE_REP`, `normalizeSupervisor()`, `downloadModeloCSV()`
-- [ ] **`import-envio.js`** — `processEnvioImport()`, `processEnvioImportStreaming()`, `downloadModeloEnvioCSV()`
-- [ ] **`import-esmeralda.js`** — `processEsmeraldaImport()`, `mapCategoriaEsmeralda()`
-- [ ] Constantes de classificação de envio: `ENVIO_SEM_INT`, `ENVIO_CONV`, `ENVIO_WS`, `getTipoIntExpected()`
+- [x] **`import-g5.js`** — `processImport()`, `IGNORE_REP`, `normalizeSupervisor()`, `downloadModeloCSV()`
+- [x] **`import-envio.js`** — `processEnvioImport()`, `processEnvioImportStreaming()`, `downloadModeloEnvioCSV()`
+- [x] **`import-esmeralda.js`** — `processEsmeraldaImport()`, `mapCategoriaEsmeralda()`
+- [x] Constantes de classificação de envio: `ENVIO_SEM_INT`, `ENVIO_CONV`, `ENVIO_WS`, `getTipoIntExpected()`
+
+**Alterações realizadas:**
+- Criada pasta `import/` com 3 módulos JS (defer).
+- Removidos ~323 linhas do script inline (blocos de engines + constantes).
+- Adicionados scripts no `<head>`: `import-g5.js`, `import-envio.js`, `import-esmeralda.js`.
+- Funções expostas via `window.*` para compatibilidade com chamadas no inline.
+- Ordem de carregamento defer garante dependências (`db.js`, `utils.js`, `auth.js` antes dos imports).
 
 ---
 
 ### FASE 3 — Web Components de estrutura
 
-- [x] **`db-sidebar.js`** — ✅ Concluído (V25)
-- [ ] **`db-topbar.js`** — Extrair `<div class="topbar">`: título da página, subtítulo, botões de ação (`#topbar-actions`). Evento `db-topbar-action`.
+**Análise das alterações necessárias:**
+
+- [x] **`db-topbar.js`** — Extrair `<div class="topbar">`: título da página, subtítulo, botões de ação (`#topbar-actions`). Evento `db-topbar-action`.
+  - **Estrutura atual:** HTML estático no index.html, manipulado via `document.getElementById('page-title').textContent`, `document.getElementById('page-sub').textContent`, `document.getElementById('topbar-actions').innerHTML`.
+  - **Alterações:** Criar Web Component `<db-topbar>` que encapsula o HTML e expõe propriedades `title`, `subtitle`, `actions` (innerHTML). Disparar evento customizado `db-topbar-action` quando botões são clicados.
+  - **Benefício:** Centraliza lógica de UI da topbar, facilita manutenção e reutilização.
+
 - [ ] **`db-login.js`** — Extrair `<div id="login-screen">` com lógica de login, validação e erro.
+  - **Estrutura atual:** HTML estático no index.html, lógica de login em `core/auth.js` (funções `showLogin()`, `hideLogin()`, `login()`).
+  - **Alterações:** Criar Web Component `<db-login>` que encapsula o HTML do formulário e a lógica de autenticação. Usar propriedades para estado (visível/oculto, erro) e eventos para comunicação (login-success, login-error).
+  - **Benefício:** Separa completamente a UI de login do core de autenticação, permitindo testes isolados e reutilização.
+
 - [ ] **`db-toast.js`** — Extrair `<div id="toast">` e a função `toast()`.
+  - **Estrutura atual:** HTML estático (`<div id="toast"></div>`), função `toast()` em `core/utils.js`.
+  - **Alterações:** Criar Web Component `<db-toast>` que gerencia sua própria lista de toasts internamente. Expor método `show(msg, type, duration)` via propriedade ou evento. Remover `toast()` de utils.js.
+  - **Benefício:** Encapsula estado e lógica dos toasts, evita manipulação direta do DOM global.
+
 - [ ] **`db-modal.js`** — Extrair `openModal()` / `closeModal()` como componente controlado.
+  - **Estrutura atual:** Funções `openModal()` e `closeModal()` em `core/utils.js`, criam elementos dinamicamente no `#modal-container`.
+  - **Alterações:** Criar Web Component `<db-modal>` que seja controlado por propriedades (open: boolean, content: string). Remover funções de utils.js, usar o componente diretamente no código.
+  - **Benefício:** Torna modais declarativos e reutilizáveis, facilita testes e manutenção.
+
+**Alterações no index.html:**
+- Substituir `<div class="topbar">` por `<db-topbar id="topbar"></db-topbar>`.
+- Substituir `<div id="login-screen">` por `<db-login id="login"></db-login>`.
+- Substituir `<div id="toast"></div>` por `<db-toast id="toast"></db-toast>`.
+- Remover `<div id="modal-container"></div>`, pois `<db-modal>` será usado inline onde necessário.
+- Adicionar scripts: `<script src="./components/db-topbar.js" defer></script>`, etc.
+
+**Impacto:** Refatora UI para componentes Web, melhorando separação de responsabilidades. Código das páginas precisará ser ajustado para usar APIs dos componentes em vez de manipulação direta do DOM.
 
 ---
 
@@ -438,36 +468,43 @@ db-lab-manager/
 ├── index.html                     ← shell mínimo: <db-sidebar>, <db-topbar>, <main>
 ├── app.js                         ← boot: initDB → doLogin → navigate
 │
-├── core/
-│   ├── db.js                      ← IndexedDB (Fase 1)
-│   ├── auth.js                    ← sessão, RLS, ACL (Fase 1)
-│   ├── router.js                  ← navigate(), pages map (Fase 1)
-│   └── utils.js                   ← toast, modal, makeSortable (Fase 1)
+├── core/                          ← módulos core (IIFE clássicos)
+│   ├── db.js                      ← IndexedDB: dbAll, dbGet, dbPut, dbAdd, dbDelete
+│   ├── auth.js                    ← login/logout, currentUser, auditLog
+│   ├── router.js                  ← navigate(), pages object
+│   └── utils.js                   ← makeSortable, generateReport, normalizeSupervisor, etc.
 │
-├── import/
-│   ├── import-g5.js               ← Base G5 (Fase 2)
-│   ├── import-envio.js            ← Base de Envio (Fase 2)
-│   └── import-esmeralda.js        ← Lista Esmeralda (Fase 2)
+├── components/                    ← Web Components (Custom Elements)
+│   ├── db-sidebar.js              ← navegação lateral
+│   ├── db-topbar.js               ← ✅ Concluído (V28)
+│   ├── db-login.js                ← tela de login
+│   ├── db-toast.js                ← notificações
+│   └── db-modal.js                ← modais controlados
 │
-├── components/
-│   ├── db-sidebar.js              ← ✅ Concluído
-│   ├── db-topbar.js               ← (Fase 3)
-│   ├── db-login.js                ← (Fase 3)
-│   ├── db-toast.js                ← (Fase 3)
-│   └── db-modal.js                ← (Fase 3)
+├── import/                        ← engines de importação (IIFE clássicos)
+│   ├── import-g5.js               ← processImport()
+│   ├── import-envio.js            ← processEnvioImport(), processEnvioImportStreaming()
+│   └── import-esmeralda.js        ← processEsmeraldaImport()
 │
-└── pages/
-    ├── dashboard.js               ← (Fase 4)
-    ├── dashboard-comercial.js     ← (Fase 4)
-    ├── dashboard-financeiro.js    ← (Fase 4)
-    ├── laboratorios.js            ← (Fase 4)
-    ├── representantes.js          ← (Fase 4)
-    ├── assessores.js              ← (Fase 4)
-    ├── supervisores.js            ← (Fase 4)
-    ├── analistas.js               ← (Fase 4)
-    ├── sistemas.js                ← (Fase 4)
-    ├── grupos-matrizes.js         ← (Fase 4)
-    ├── divergencias.js            ← (Fase 4)
+├── pages/                         ← módulos de páginas (ES modules)
+│   ├── dashboard.js
+│   ├── dashboard-comercial.js
+│   ├── dashboard-financeiro.js
+│   ├── laboratorios.js
+│   ├── representantes.js
+│   ├── assessores.js
+│   ├── supervisores.js
+│   ├── analistas.js
+│   ├── sistemas.js
+│   ├── grupos-matrizes.js
+│   ├── divergencias.js
+│   ├── propostas.js
+│   ├── pacotes.js
+│   ├── importacao.js
+│   └── perfis-acesso.js
+│
+└── DB_LAB_MANAGER_PROJECT.md       ← esta documentação
+```
     ├── propostas.js               ← (Fase 4)
     ├── pacotes.js                 ← (Fase 4)
     ├── importacao.js              ← (Fase 4)
