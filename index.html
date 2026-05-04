@@ -5078,10 +5078,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }).catch(function (err) {
     const loginEl = document.getElementById('login');
+    var message = 'Erro ao inicializar o banco de dados.';
+    if (err && err.message) message += ' ' + err.message;
     if (loginEl && typeof loginEl.setError === 'function') {
-      loginEl.setError('Erro ao inicializar o banco de dados.');
+      loginEl.setError(message);
     }
-    console.error(err);
+    console.error('initDB failed:', err);
   });
 });
 </script>
