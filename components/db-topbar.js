@@ -100,18 +100,15 @@
 
     setupEventListeners() {
       // Delegar eventos de clique nos botões para o componente pai
-      this.shadowRoot.addEventListener('click', (e) => {
+      this.addEventListener('click', (e) => {
         const target = e.target;
-        if (target.matches('button') || target.closest('button')) {
-          const button = target.closest('button');
-          if (button && button.id) {
-            // Disparar evento customizado com o ID do botão
-            this.dispatchEvent(new CustomEvent('db-topbar-action', {
-              detail: { action: button.id, element: button },
-              bubbles: true,
-              composed: true
-            }));
-          }
+        const button = target.closest('button');
+        if (button && button.id) {
+          this.dispatchEvent(new CustomEvent('db-topbar-action', {
+            detail: { action: button.id, element: button },
+            bubbles: true,
+            composed: true
+          }));
         }
       });
     }
