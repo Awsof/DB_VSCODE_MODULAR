@@ -1,6 +1,6 @@
 # DB Lab Manager — Documentação do Projeto
 
-> **Versão atual:** index_V28.html + core/ (4 módulos IIFE clássicos) + components/db-sidebar.js + components/db-topbar.js + import/ (3 módulos de engines)
+> **Versão atual:** index.html + core/ (4 módulos IIFE clássicos) + components/ (4 Web Components: topbar, login, toast, modal) + pages/ (dashboard, laboratórios, representantes, assessores, supervisores, analistas, sistemas, grupos_matrizes, dashboard_financeiro, dashboard_comercial, importacao, divergencias, propostas, pacotes, perfis_acesso extraídos) + import/ (3 módulos de engines) — **FASE 3 concluída, FASE 4 em progresso**
 
 ---
 
@@ -413,26 +413,28 @@ Os 4 módulos foram reescritos como **scripts clássicos IIFE** (`Immediately In
   - **Alterações:** Criar Web Component `<db-topbar>` que encapsula o HTML e expõe propriedades `title`, `subtitle`, `actions` (innerHTML). Disparar evento customizado `db-topbar-action` quando botões são clicados.
   - **Benefício:** Centraliza lógica de UI da topbar, facilita manutenção e reutilização.
 
-- [ ] **`db-login.js`** — Extrair `<div id="login-screen">` com lógica de login, validação e erro.
+- [x] **`db-login.js`** — Extrair `<div id="login-screen">` com lógica de login, validação e erro.
   - **Estrutura atual:** HTML estático no index.html, lógica de login em `core/auth.js` (funções `showLogin()`, `hideLogin()`, `login()`).
   - **Alterações:** Criar Web Component `<db-login>` que encapsula o HTML do formulário e a lógica de autenticação. Usar propriedades para estado (visível/oculto, erro) e eventos para comunicação (login-success, login-error).
   - **Benefício:** Separa completamente a UI de login do core de autenticação, permitindo testes isolados e reutilização.
 
-- [ ] **`db-toast.js`** — Extrair `<div id="toast">` e a função `toast()`.
+- [x] **`db-toast.js`** — Extrair `<div id="toast">` e a função `toast()`.
   - **Estrutura atual:** HTML estático (`<div id="toast"></div>`), função `toast()` em `core/utils.js`.
   - **Alterações:** Criar Web Component `<db-toast>` que gerencia sua própria lista de toasts internamente. Expor método `show(msg, type, duration)` via propriedade ou evento. Remover `toast()` de utils.js.
   - **Benefício:** Encapsula estado e lógica dos toasts, evita manipulação direta do DOM global.
 
-- [ ] **`db-modal.js`** — Extrair `openModal()` / `closeModal()` como componente controlado.
+- [x] **`db-modal.js`** — Extrair `openModal()` / `closeModal()` como componente controlado.
   - **Estrutura atual:** Funções `openModal()` e `closeModal()` em `core/utils.js`, criam elementos dinamicamente no `#modal-container`.
   - **Alterações:** Criar Web Component `<db-modal>` que seja controlado por propriedades (open: boolean, content: string). Remover funções de utils.js, usar o componente diretamente no código.
   - **Benefício:** Torna modais declarativos e reutilizáveis, facilita testes e manutenção.
 
 **Alterações no index.html:**
-- Substituir `<div class="topbar">` por `<db-topbar id="topbar"></db-topbar>`.
-- Substituir `<div id="login-screen">` por `<db-login id="login"></db-login>`.
-- Substituir `<div id="toast"></div>` por `<db-toast id="toast"></db-toast>`.
-- Remover `<div id="modal-container"></div>`, pois `<db-modal>` será usado inline onde necessário.
+- ✅ Substituir `<div class="topbar">` por `<db-topbar id="topbar"></db-topbar>`.
+- ✅ Substituir `<div id="login-screen">` por `<db-login id="login"></db-login>`.
+- ✅ Substituir `<div id="toast"></div>` por `<db-toast id="toast"></db-toast>`.
+- ✅ Substituir `<div id="modal-container"></div>` por `<db-modal id="modal"></db-modal>`.
+- ✅ Remover estilos de `.modal-overlay`, `.modal`, `.modal-*` (agora em Shadow DOM).
+
 - Adicionar scripts: `<script src="./components/db-topbar.js" defer></script>`, etc.
 
 **Impacto:** Refatora UI para componentes Web, melhorando separação de responsabilidades. Código das páginas precisará ser ajustado para usar APIs dos componentes em vez de manipulação direta do DOM.
@@ -441,23 +443,25 @@ Os 4 módulos foram reescritos como **scripts clássicos IIFE** (`Immediately In
 
 ### FASE 4 — Extração de páginas (maior impacto, fazer uma por vez)
 
+A estratégia será retirar uma página por vez, começando pela página de dashboard principal.
+
 Cada página deve se tornar um módulo `pages/[nome].js` exportando uma função `async render(container)`.
 
-- [ ] **`pages/dashboard.js`** — Dashboard Integração (gráficos dinâmicos, métricas, relatório)
-- [ ] **`pages/dashboard-comercial.js`** — Dashboard Comercial (heatmap SVG, gráficos, filtro de período)
-- [ ] **`pages/dashboard-financeiro.js`** — Dashboard Financeiro (budget, propostas, gráficos)
-- [ ] **`pages/laboratorios.js`** — Lista + filtros + modal edição + chamados inline
-- [ ] **`pages/representantes.js`** — CRUD de representantes
-- [ ] **`pages/assessores.js`** — Visualização Esmeralda/Chivor
-- [ ] **`pages/supervisores.js`** — CRUD de supervisores
-- [ ] **`pages/analistas.js`** — CRUD + modal de performance
-- [ ] **`pages/sistemas.js`** — CRUD de sistemas
-- [ ] **`pages/grupos-matrizes.js`** — Consulta hierárquica
-- [ ] **`pages/divergencias.js`** — Motor de divergências + filtros
-- [ ] **`pages/propostas.js`** — CRUD de propostas
-- [ ] **`pages/pacotes.js`** — CRUD de pacotes + registros
-- [ ] **`pages/importacao.js`** — Upload + progresso + histórico
-- [ ] **`pages/perfis-acesso.js`** — ACL + usuários + audit log
+- [x] **`pages/dashboard.js`** — Dashboard Integração (gráficos dinâmicos, métricas, relatório)
+- [x] **`pages/dashboard-comercial.js`** — Dashboard Comercial (heatmap SVG, gráficos, filtro de período)
+- [x] **`pages/dashboard-financeiro.js`** — Dashboard Financeiro (budget, propostas, gráficos)
+- [x] **`pages/laboratorios.js`** — Lista + filtros + modal edição + chamados inline
+- [x] **`pages/representantes.js`** — CRUD de representantes
+- [x] **`pages/assessores.js`** — Visualização Esmeralda/Chivor
+- [x] **`pages/supervisores.js`** — CRUD de supervisores
+- [x] **`pages/analistas.js`** — CRUD + modal de performance
+- [x] **`pages/sistemas.js`** — CRUD de sistemas
+- [x] **`pages/grupos_matrizes.js`** — Consulta hierárquica
+- [x] **`pages/divergencias.js`** — Motor de divergências + filtros
+- [x] **`pages/propostas.js`** — CRUD de propostas
+- [x] **`pages/pacotes.js`** — CRUD de pacotes + registros
+- [x] **`pages/importacao.js`** — Upload + progresso + histórico
+- [x] **`pages/perfis_acesso.js`** — ACL + usuários + audit log
 
 ---
 
@@ -476,10 +480,10 @@ db-lab-manager/
 │
 ├── components/                    ← Web Components (Custom Elements)
 │   ├── db-sidebar.js              ← navegação lateral
-│   ├── db-topbar.js               ← ✅ Concluído (V28)
-│   ├── db-login.js                ← tela de login
-│   ├── db-toast.js                ← notificações
-│   └── db-modal.js                ← modais controlados
+│   ├── db-topbar.js               ← ✅ Concluído (FASE 3)
+│   ├── db-login.js                ← ✅ Concluído (FASE 3)
+│   ├── db-toast.js                ← ✅ Concluído (FASE 3)
+│   └── db-modal.js                ← ✅ Concluído (FASE 3)
 │
 ├── import/                        ← engines de importação (IIFE clássicos)
 │   ├── import-g5.js               ← processImport()
@@ -501,14 +505,14 @@ db-lab-manager/
 │   ├── propostas.js
 │   ├── pacotes.js
 │   ├── importacao.js
-│   └── perfis-acesso.js
+│   └── perfis_acesso.js
 │
 └── DB_LAB_MANAGER_PROJECT.md       ← esta documentação
 ```
     ├── propostas.js               ← (Fase 4)
     ├── pacotes.js                 ← (Fase 4)
     ├── importacao.js              ← (Fase 4)
-    └── perfis-acesso.js           ← (Fase 4)
+    └── perfis_acesso.js           ← (Fase 4)
 ```
 
 ---
